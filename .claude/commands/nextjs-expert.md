@@ -873,6 +873,408 @@ function helperFunction() { }
 9. Skip type definitions
 10. Put everything in a single file
 
+## Animations & Motion
+
+### Framer Motion Integration
+
+**REQUIRED**: Use Framer Motion for all animations to create smooth, professional motion.
+
+**Installation**: Already installed via `npm install framer-motion`
+
+**When to Animate:**
+- Page transitions
+- Component entrances/exits
+- Hover states and interactions
+- Loading states
+- Form feedback
+- Modal/dialog appearances
+- List item additions/removals
+- Status changes (order status updates)
+- Micro-interactions (buttons, cards)
+
+### Animation Patterns
+
+#### Basic Motion Component
+
+```tsx
+'use client'
+
+import { motion } from 'framer-motion'
+
+export function AnimatedCard() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="card"
+    >
+      Content
+    </motion.div>
+  )
+}
+```
+
+#### Stagger Children Animation
+
+```tsx
+'use client'
+
+import { motion } from 'framer-motion'
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+}
+
+export function MenuGrid({ items }: { items: MenuItem[] }) {
+  return (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="grid grid-cols-3 gap-4"
+    >
+      {items.map((item) => (
+        <motion.div key={item.id} variants={item}>
+          <MenuCard item={item} />
+        </motion.div>
+      ))}
+    </motion.div>
+  )
+}
+```
+
+#### Hover and Tap Interactions
+
+```tsx
+'use client'
+
+import { motion } from 'framer-motion'
+
+export function InteractiveButton() {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      className="btn"
+    >
+      Add to Order
+    </motion.button>
+  )
+}
+```
+
+#### Layout Animations
+
+```tsx
+'use client'
+
+import { motion } from 'framer-motion'
+
+export function OrderCard({ order }: { order: Order }) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="card"
+    >
+      {/* Content changes smoothly animate */}
+    </motion.div>
+  )
+}
+```
+
+### React Bits Components
+
+**Using React Bits Animated Components:**
+
+React Bits (reactbits.dev) provides pre-built animated components. Add them using:
+
+```bash
+# Add a specific component from React Bits
+npx shadcn@latest add "https://reactbits.dev/r/component-name"
+```
+
+**Available Component Types:**
+- Animated buttons and cards
+- Interactive icons
+- Loading states
+- Hover effects
+- Scroll animations
+
+**Integration Pattern:**
+```tsx
+// After adding a React Bits component, use it like shadcn/ui
+import { AnimatedButton } from '@/components/ui/animated-button'
+
+export function MyComponent() {
+  return <AnimatedButton>Click me</AnimatedButton>
+}
+```
+
+### Animation Best Practices
+
+1. **Keep it Simple** - Subtle animations are better than flashy ones
+2. **Performance** - Use `transform` and `opacity` for best performance
+3. **Duration** - Most animations should be 200-400ms
+4. **Easing** - Use spring animations for natural feel
+5. **Accessibility** - Respect `prefers-reduced-motion`
+6. **Consistent** - Use same animation patterns throughout
+7. **Purpose** - Every animation should have a purpose
+
+### Reduced Motion Support
+
+```tsx
+'use client'
+
+import { motion, useReducedMotion } from 'framer-motion'
+
+export function AccessibleAnimation() {
+  const shouldReduceMotion = useReducedMotion()
+
+  return (
+    <motion.div
+      initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
+    >
+      Content
+    </motion.div>
+  )
+}
+```
+
+### Common Animation Variants
+
+```typescript
+// src/lib/animation-variants.ts
+
+export const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 }
+}
+
+export const slideUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+}
+
+export const slideDown = {
+  hidden: { opacity: 0, y: -20 },
+  visible: { opacity: 1, y: 0 }
+}
+
+export const scaleIn = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { opacity: 1, scale: 1 }
+}
+
+export const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+```
+
+## Image Handling & Food Placeholders
+
+### CRITICAL: Always Use Food Placeholders
+
+**REQUIRED**: When images don't exist or fail to load, use beautiful food placeholder images.
+
+### Image Component Pattern
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import Image from 'next/image'
+import { motion } from 'framer-motion'
+
+interface FoodImageProps {
+  src?: string | null
+  alt: string
+  category?: string
+  className?: string
+}
+
+export function FoodImage({ src, alt, category = 'food', className }: FoodImageProps) {
+  const [imgError, setImgError] = useState(false)
+
+  // Food placeholder images by category
+  const getPlaceholder = (category: string): string => {
+    const placeholders: Record<string, string> = {
+      pizza: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&h=600&fit=crop',
+      burger: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop',
+      pasta: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&h=600&fit=crop',
+      salad: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop',
+      dessert: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&h=600&fit=crop',
+      drinks: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&h=600&fit=crop',
+      sushi: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800&h=600&fit=crop',
+      sandwich: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&h=600&fit=crop',
+      soup: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&h=600&fit=crop',
+      seafood: 'https://images.unsplash.com/photo-1559737558-2f99b8ab6e1c?w=800&h=600&fit=crop',
+      chicken: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800&h=600&fit=crop',
+      steak: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&h=600&fit=crop',
+      breakfast: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&h=600&fit=crop',
+      food: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop', // Generic
+    }
+
+    return placeholders[category.toLowerCase()] || placeholders.food
+  }
+
+  const imageSrc = (!src || imgError) ? getPlaceholder(category) : src
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className={className}
+    >
+      <Image
+        src={imageSrc}
+        alt={alt}
+        fill
+        className="object-cover"
+        onError={() => setImgError(true)}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </motion.div>
+  )
+}
+```
+
+### Usage Examples
+
+```tsx
+// Menu card with automatic placeholder
+<div className="relative h-48 w-full rounded-lg overflow-hidden">
+  <FoodImage
+    src={menuItem.imageUrl}
+    alt={menuItem.name}
+    category={menuItem.category} // 'pizza', 'burger', etc.
+  />
+</div>
+
+// Order item with placeholder
+<FoodImage
+  src={item.image}
+  alt={item.name}
+  category="food" // Generic fallback
+  className="h-20 w-20 rounded-md"
+/>
+```
+
+### Food Placeholder Categories
+
+Use these category names for optimal placeholders:
+
+- `pizza` - Pizza dishes
+- `burger` - Burgers and sandwiches
+- `pasta` - Pasta dishes
+- `salad` - Salads and healthy bowls
+- `dessert` - Desserts and sweets
+- `drinks` - Beverages
+- `sushi` - Sushi and Japanese cuisine
+- `sandwich` - Sandwiches and wraps
+- `soup` - Soups and broths
+- `seafood` - Seafood dishes
+- `chicken` - Chicken dishes
+- `steak` - Steaks and meat dishes
+- `breakfast` - Breakfast items
+- `food` - Generic food (fallback)
+
+### Alternative Placeholder Services
+
+```typescript
+// Using Picsum for placeholders (simple but not food-specific)
+const placeholder = `https://picsum.photos/seed/${itemId}/800/600`
+
+// Using Lorem Picsum with blur
+const placeholder = `https://picsum.photos/800/600?blur=2`
+
+// Using local placeholder (recommended for offline)
+const placeholder = '/images/placeholder-food.jpg'
+```
+
+### Local Placeholder Setup
+
+```bash
+# Add to public/images/
+public/
+├── images/
+│   ├── placeholder-food.jpg
+│   ├── placeholder-pizza.jpg
+│   ├── placeholder-burger.jpg
+│   └── placeholder-dessert.jpg
+```
+
+### Image Loading States
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import Image from 'next/image'
+import { motion } from 'framer-motion'
+import { Skeleton } from '@/components/ui/skeleton'
+
+export function LoadingFoodImage({ src, alt }: { src: string; alt: string }) {
+  const [isLoading, setIsLoading] = useState(true)
+
+  return (
+    <div className="relative h-48 w-full">
+      {isLoading && (
+        <Skeleton className="absolute inset-0" />
+      )}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className="object-cover rounded-lg"
+          onLoadingComplete={() => setIsLoading(false)}
+        />
+      </motion.div>
+    </div>
+  )
+}
+```
+
+### Image Best Practices
+
+1. **Always provide alt text** - For accessibility
+2. **Use Next.js Image component** - For optimization
+3. **Define sizes prop** - For responsive images
+4. **Use placeholders** - Never show broken images
+5. **Lazy load** - Use loading="lazy" for below-fold images
+6. **Optimize** - Use WebP format when possible
+7. **Category-specific** - Match placeholder to food type
+
 ## WhatsApp Integration Notes
 - WhatsApp integration will likely require client-side APIs
 - Consider using WhatsApp Business API or Web.js

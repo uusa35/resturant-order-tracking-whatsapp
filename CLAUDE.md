@@ -51,6 +51,7 @@ Uses Next.js `next/font` with Geist Sans and Geist Mono fonts, loaded as CSS var
 - **TypeScript 5**: With strict type checking
 - **Zustand 5.0.8**: State management with localStorage persistence
 - **shadcn/ui**: Component library (class-variance-authority, clsx, tailwind-merge, lucide-react)
+- **Framer Motion**: Animation library for smooth, professional motion
 
 ## State Management
 
@@ -74,6 +75,42 @@ Uses **localStorage** as database (no backend):
 - Utility function: `src/lib/utils.ts` (cn helper for class merging)
 - Theme variables in `src/app/globals.css`
 - Add components: `npx shadcn@latest add [component-name]`
+
+## Animations & Motion
+
+**Framer Motion** for all animations:
+- Smooth page transitions and component animations
+- Pre-built animation variants in `src/lib/animation-variants.ts`
+- Use `motion` components from `framer-motion`
+- React Bits components for pre-built animated UI
+- Add React Bits: `npx shadcn@latest add "https://reactbits.dev/r/component-name"`
+
+**Animation Guidelines:**
+- Keep animations subtle (200-400ms duration)
+- Use spring animations for natural feel
+- Respect `prefers-reduced-motion`
+- Animate page transitions, hover states, loading states
+
+## Image Handling
+
+**FoodImage Component** for all food images:
+- Location: `src/components/shared/images/food-image.tsx`
+- Automatic fallback to beautiful food placeholders
+- 14 category-specific placeholders (pizza, burger, pasta, etc.)
+- Uses Unsplash high-quality food images
+- Includes loading states and error handling
+
+**Usage:**
+```tsx
+import { FoodImage } from '@/components/shared/images'
+
+<FoodImage
+  src={menuItem.imageUrl}
+  alt={menuItem.name}
+  category="pizza" // Automatic placeholder if image fails
+  fill
+/>
+```
 
 ## Project Structure
 
@@ -107,7 +144,8 @@ src/
 │   │   └── customers/      # CustomerTable, CustomerForm
 │   └── shared/             # Truly shared components
 │       ├── forms/          # Form inputs
-│       └── feedback/       # Loading, errors
+│       ├── feedback/       # Loading, errors
+│       └── images/         # FoodImage component
 │
 ├── services/               # Business logic & data operations
 │   ├── orders.service.ts   # Order CRUD & business logic
@@ -121,7 +159,9 @@ src/
 │
 ├── lib/                    # Utility functions
 │   ├── storage.ts          # localStorage helpers
-│   └── utils.ts            # General utilities
+│   ├── database.ts         # Database abstraction
+│   ├── utils.ts            # General utilities
+│   └── animation-variants.ts # Framer Motion animation presets
 │
 ├── types/                  # TypeScript definitions
 │   ├── index.ts            # Shared types
