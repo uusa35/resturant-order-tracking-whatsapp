@@ -77,16 +77,68 @@ Uses **localStorage** as database (no backend):
 
 ## Project Structure
 
+**Strictly organized by separation of concerns:**
+
 ```
 src/
-├── app/              # Next.js App Router pages
-├── components/       # React components
-│   └── ui/          # shadcn/ui components
-├── stores/          # Zustand stores
-├── lib/             # Utility functions (storage.ts, utils.ts)
-├── types/           # TypeScript interfaces
-└── hooks/           # Custom React hooks
+├── app/                      # Next.js App Router
+│   ├── (frontend)/          # Public customer-facing pages
+│   │   ├── page.tsx         # Home page
+│   │   ├── menu/            # Menu browsing
+│   │   └── orders/          # Order tracking
+│   └── dashboard/           # Admin dashboard
+│       ├── orders/          # Order management
+│       ├── customers/       # Customer management
+│       └── menu/            # Menu management
+│
+├── views/                   # Page-level view components
+│   ├── frontend/            # Frontend views
+│   └── dashboard/           # Dashboard views
+│
+├── components/              # Reusable components
+│   ├── ui/                 # shadcn/ui base components
+│   ├── frontend/           # Frontend-specific components
+│   │   ├── layout/         # Header, Footer, Navigation
+│   │   ├── menu/           # Menu components
+│   │   └── orders/         # Order components
+│   ├── dashboard/          # Dashboard-specific components
+│   │   ├── layout/         # Sidebar, DashboardNav
+│   │   ├── orders/         # OrderTable, OrderFilters
+│   │   └── customers/      # CustomerTable, CustomerForm
+│   └── shared/             # Truly shared components
+│       ├── forms/          # Form inputs
+│       └── feedback/       # Loading, errors
+│
+├── services/               # Business logic & data operations
+│   ├── orders.service.ts   # Order CRUD & business logic
+│   ├── customers.service.ts
+│   └── menu.service.ts
+│
+├── stores/                 # Zustand state management
+│   ├── orders.store.ts     # Order state with persist
+│   ├── customers.store.ts
+│   └── ui.store.ts
+│
+├── lib/                    # Utility functions
+│   ├── storage.ts          # localStorage helpers
+│   └── utils.ts            # General utilities
+│
+├── types/                  # TypeScript definitions
+│   ├── index.ts            # Shared types
+│   └── orders.types.ts     # Domain-specific types
+│
+└── hooks/                  # Custom React hooks
+    └── use-local-storage.ts
 ```
+
+## Code Organization Principles
+
+1. **Frontend/Dashboard Separation**: Never mix frontend and dashboard code
+2. **Service Layer**: All business logic and localStorage operations in services
+3. **View Layer**: Page-level components that orchestrate UI
+4. **Component Layer**: Reusable, domain-organized components
+5. **Type Safety**: Everything properly typed with TypeScript
+6. **State Management**: Zustand stores with localStorage persistence
 
 ## Claude Agent
 
