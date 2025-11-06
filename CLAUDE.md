@@ -49,10 +49,52 @@ Uses Next.js `next/font` with Geist Sans and Geist Mono fonts, loaded as CSS var
 - **React 19.2.0**: Latest React version
 - **Tailwind CSS v4**: New PostCSS-based version (breaking changes from v3)
 - **TypeScript 5**: With strict type checking
+- **Zustand 5.0.8**: State management with localStorage persistence
+- **shadcn/ui**: Component library (class-variance-authority, clsx, tailwind-merge, lucide-react)
+
+## State Management
+
+Uses **Zustand** for global state with localStorage persistence:
+- Store files in `src/stores/`
+- Use `persist` middleware for automatic localStorage sync
+- Example: `src/stores/example-store.ts`
+
+## Data Persistence
+
+Uses **localStorage** as database (no backend):
+- Storage utilities in `src/lib/storage.ts` (type-safe helpers)
+- Custom hook: `src/hooks/use-local-storage.ts` for React state + localStorage
+- Zustand stores automatically persist via `persist` middleware
+
+## Component System
+
+**shadcn/ui** setup complete:
+- Config: `components.json`
+- UI components directory: `src/components/ui/`
+- Utility function: `src/lib/utils.ts` (cn helper for class merging)
+- Theme variables in `src/app/globals.css`
+- Add components: `npx shadcn@latest add [component-name]`
+
+## Project Structure
+
+```
+src/
+├── app/              # Next.js App Router pages
+├── components/       # React components
+│   └── ui/          # shadcn/ui components
+├── stores/          # Zustand stores
+├── lib/             # Utility functions (storage.ts, utils.ts)
+├── types/           # TypeScript interfaces
+└── hooks/           # Custom React hooks
+```
+
+## Claude Agent
+
+Run `/nextjs-expert` to get expert guidance on Next.js development patterns and best practices for this project.
 
 ## Notes
 
-- This project is in early stages - most files are from create-next-app boilerplate
-- No backend/API routes implemented yet
-- No WhatsApp integration present yet
-- No database or state management configured
+- No backend - all data stored in browser localStorage
+- No WhatsApp integration implemented yet (planned)
+- Theme: Zinc color palette with dark mode support
+- Use Server Components by default, add 'use client' only when needed
