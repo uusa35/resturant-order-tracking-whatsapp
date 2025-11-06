@@ -49,10 +49,104 @@ Uses Next.js `next/font` with Geist Sans and Geist Mono fonts, loaded as CSS var
 - **React 19.2.0**: Latest React version
 - **Tailwind CSS v4**: New PostCSS-based version (breaking changes from v3)
 - **TypeScript 5**: With strict type checking
+- **Zustand 5.0.8**: State management with localStorage persistence
+- **shadcn/ui**: Component library (class-variance-authority, clsx, tailwind-merge, lucide-react)
+
+## State Management
+
+Uses **Zustand** for global state with localStorage persistence:
+- Store files in `src/stores/`
+- Use `persist` middleware for automatic localStorage sync
+- Example: `src/stores/example-store.ts`
+
+## Data Persistence
+
+Uses **localStorage** as database (no backend):
+- Storage utilities in `src/lib/storage.ts` (type-safe helpers)
+- Custom hook: `src/hooks/use-local-storage.ts` for React state + localStorage
+- Zustand stores automatically persist via `persist` middleware
+
+## Component System
+
+**shadcn/ui** setup complete:
+- Config: `components.json`
+- UI components directory: `src/components/ui/`
+- Utility function: `src/lib/utils.ts` (cn helper for class merging)
+- Theme variables in `src/app/globals.css`
+- Add components: `npx shadcn@latest add [component-name]`
+
+## Project Structure
+
+**Strictly organized by separation of concerns:**
+
+```
+src/
+├── app/                      # Next.js App Router
+│   ├── (frontend)/          # Public customer-facing pages
+│   │   ├── page.tsx         # Home page
+│   │   ├── menu/            # Menu browsing
+│   │   └── orders/          # Order tracking
+│   └── dashboard/           # Admin dashboard
+│       ├── orders/          # Order management
+│       ├── customers/       # Customer management
+│       └── menu/            # Menu management
+│
+├── views/                   # Page-level view components
+│   ├── frontend/            # Frontend views
+│   └── dashboard/           # Dashboard views
+│
+├── components/              # Reusable components
+│   ├── ui/                 # shadcn/ui base components
+│   ├── frontend/           # Frontend-specific components
+│   │   ├── layout/         # Header, Footer, Navigation
+│   │   ├── menu/           # Menu components
+│   │   └── orders/         # Order components
+│   ├── dashboard/          # Dashboard-specific components
+│   │   ├── layout/         # Sidebar, DashboardNav
+│   │   ├── orders/         # OrderTable, OrderFilters
+│   │   └── customers/      # CustomerTable, CustomerForm
+│   └── shared/             # Truly shared components
+│       ├── forms/          # Form inputs
+│       └── feedback/       # Loading, errors
+│
+├── services/               # Business logic & data operations
+│   ├── orders.service.ts   # Order CRUD & business logic
+│   ├── customers.service.ts
+│   └── menu.service.ts
+│
+├── stores/                 # Zustand state management
+│   ├── orders.store.ts     # Order state with persist
+│   ├── customers.store.ts
+│   └── ui.store.ts
+│
+├── lib/                    # Utility functions
+│   ├── storage.ts          # localStorage helpers
+│   └── utils.ts            # General utilities
+│
+├── types/                  # TypeScript definitions
+│   ├── index.ts            # Shared types
+│   └── orders.types.ts     # Domain-specific types
+│
+└── hooks/                  # Custom React hooks
+    └── use-local-storage.ts
+```
+
+## Code Organization Principles
+
+1. **Frontend/Dashboard Separation**: Never mix frontend and dashboard code
+2. **Service Layer**: All business logic and localStorage operations in services
+3. **View Layer**: Page-level components that orchestrate UI
+4. **Component Layer**: Reusable, domain-organized components
+5. **Type Safety**: Everything properly typed with TypeScript
+6. **State Management**: Zustand stores with localStorage persistence
+
+## Claude Agent
+
+Run `/nextjs-expert` to get expert guidance on Next.js development patterns and best practices for this project.
 
 ## Notes
 
-- This project is in early stages - most files are from create-next-app boilerplate
-- No backend/API routes implemented yet
-- No WhatsApp integration present yet
-- No database or state management configured
+- No backend - all data stored in browser localStorage
+- No WhatsApp integration implemented yet (planned)
+- Theme: Zinc color palette with dark mode support
+- Use Server Components by default, add 'use client' only when needed
