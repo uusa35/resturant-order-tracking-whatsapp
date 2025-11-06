@@ -21,34 +21,167 @@ You are an expert Next.js developer specializing in building modern, production-
 - Use file-based routing in `src/app/`
 
 ### State Management with Zustand
+
+**CRITICAL: ALL state management MUST use Zustand with persistence**
+
+**Core Requirements:**
 - Create stores in `src/stores/` directory
 - Use TypeScript interfaces for store state
-- Keep stores focused and modular (separate stores for orders, settings, etc.)
-- Example pattern:
+- Keep stores focused and modular (separate stores for orders, customers, menu, etc.)
+- **ALWAYS use `persist` middleware** - every store must persist to localStorage
+- Never use React's useState for data that needs to persist
+- Use Zustand for all global state and data management
+
+**Standard Store Pattern:**
 ```typescript
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
-interface StoreState {
-  // state
-  // actions
+interface EntityState {
+  // Data
+  items: Entity[]
+  selectedItem: Entity | null
+
+  // UI State
+  isLoading: boolean
+  error: string | null
+
+  // Actions
+  fetchAll: () => Promise<void>
+  getById: (id: string) => Entity | null
+  create: (data: Omit<Entity, 'id'>) => Promise<Entity>
+  update: (id: string, data: Partial<Entity>) => Promise<Entity>
+  delete: (id: string) => Promise<void>
+  setSelected: (item: Entity | null) => void
+  reset: () => void
 }
 
-export const useStore = create<StoreState>()(
+export const useEntityStore = create<EntityState>()(
   persist(
-    (set) => ({
-      // implementation
+    (set, get) => ({
+      // Initial state
+      items: [],
+      selectedItem: null,
+      isLoading: false,
+      error: null,
+
+      // Actions
+      fetchAll: async () => {
+        set({ isLoading: true, error: null })
+        try {
+          const data = await EntityService.getAll()
+          set({ items: data, isLoading: false })
+        } catch (error) {
+          set({ error: (error as Error).message, isLoading: false })
+        }
+      },
+
+      getById: (id: string) => {
+        return get().items.find(item => item.id === id) ?? null
+      },
+
+      create: async (data) => {
+        set({ isLoading: true, error: null })
+        try {
+          const newItem = await EntityService.create(data)
+          set((state) => ({
+            items: [...state.items, newItem],
+            isLoading: false,
+          }))
+          return newItem
+        } catch (error) {
+          set({ error: (error as Error).message, isLoading: false })
+          throw error
+        }
+      },
+
+      update: async (id, data) => {
+        set({ isLoading: true, error: null })
+        try {
+          const updated = await EntityService.update(id, data)
+          set((state) => ({
+            items: state.items.map(item =>
+              item.id === id ? updated : item
+            ),
+            isLoading: false,
+          }))
+          return updated
+        } catch (error) {
+          set({ error: (error as Error).message, isLoading: false })
+          throw error
+        }
+      },
+
+      delete: async (id) => {
+        set({ isLoading: true, error: null })
+        try {
+          await EntityService.delete(id)
+          set((state) => ({
+            items: state.items.filter(item => item.id !== id),
+            isLoading: false,
+          }))
+        } catch (error) {
+          set({ error: (error as Error).message, isLoading: false })
+          throw error
+        }
+      },
+
+      setSelected: (item) => set({ selectedItem: item }),
+
+      reset: () => set({
+        items: [],
+        selectedItem: null,
+        isLoading: false,
+        error: null,
+      }),
     }),
-    { name: 'store-name' }
+    {
+      name: 'entity-store', // localStorage key
+      storage: createJSONStorage(() => localStorage),
+      // Optional: partition state for selective persistence
+      partialize: (state) => ({
+        items: state.items,
+        selectedItem: state.selectedItem,
+        // Don't persist loading/error states
+      }),
+    }
   )
 )
 ```
 
-### Storage/Database
-- Use localStorage for persistent data (orders, customer info, settings)
-- Use Zustand's persist middleware to sync state with localStorage
-- Create utility functions in `src/lib/storage.ts` for direct storage operations
-- Handle storage quotas and errors gracefully
+**Store Best Practices:**
+1. **Always use persist middleware** - no exceptions
+2. Use `partialize` to exclude temporary state (loading, errors)
+3. Include both data and UI state in the same store
+4. Call services from store actions, not from components
+5. Handle loading and error states in the store
+6. Use `get()` to access current state within actions
+7. Keep store names consistent: `use[Entity]Store`
+8. One store per entity/domain (orders, customers, menu, ui, etc.)
+
+**When to Create a New Store:**
+- One store per main entity (orders, customers, menu)
+- One store for UI state (modals, sidebars, theme, etc.)
+- One store for auth/user state
+- One store for app settings/config
+
+**Storage/Database with localStorage**
+
+This project uses **localStorage as the database** - no backend required.
+
+**Database Layer:**
+- Database utilities in `src/lib/database.ts`
+- Storage helpers in `src/lib/storage.ts`
+- Services use storage utilities for CRUD operations
+- Zustand stores sync with localStorage automatically
+- All data persists in browser storage
+
+**Key Principles:**
+1. Services handle direct localStorage operations
+2. Zustand stores sync state automatically with persist middleware
+3. Use storage utilities for type-safe operations
+4. Handle storage quota and errors gracefully
+5. Initialize database on first app load
 
 ### Component Structure
 - **shadcn/ui components**: Import from `@/components/ui/`
